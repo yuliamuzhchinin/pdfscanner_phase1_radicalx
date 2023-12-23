@@ -7,10 +7,7 @@ def get_file_extension(file_path):
     _, file_extension = os.path.splitext(file_path)
     return file_extension.lower()  # Convert to lowercase for consistency
 
-
 # reads the docx format resume
-
-
 def scan_docx(file_path):
     doc = Document(file_path)
 
@@ -23,7 +20,6 @@ def scan_docx(file_path):
 
     return result
 
-
 def read_pdf(file_path):
     pdf = pdfplumber.open(file_path)
     p0 = pdf.pages[0]
@@ -32,6 +28,18 @@ def read_pdf(file_path):
     cleaned_text = re.sub(r'^\s+', '', text, flags=re.MULTILINE)
     return cleaned_text
 
+def scan_txt(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            lines = file.readlines()
+
+        # Process and format the lines as needed
+        formatted_result = "\n".join(lines)
+
+        return formatted_result
+
+    except FileNotFoundError:
+        return f"Error: File '{file_path}' not found."
 
 def extract_sections(text):
     # Define regular expressions for identifying section headers
@@ -80,17 +88,16 @@ def runner():
         input_string = scan_docx(link)
     elif type == ".pdf":
         input_string = read_pdf(link)
+    elif type == ".txt":
+        input_string = scan_txt(link)
     all_result = extract_sections(input_string)
-
-    # Print the sections
-    #for header, section in all_result.items():
-        #print(f"--- {header} ---\n{section}\n")
     result = {}
     for k, v in all_result.items():
         if k == "experience" or k == "skills" or k == "education":
             result[k] = v
     for header, section in result.items():
         print(f"--- {header} ---\n{section}\n")
+
 runner()
 
 
